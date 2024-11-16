@@ -1,0 +1,31 @@
+{
+  "server": {
+    "PORT": 8080,
+    "HOST": "localhost",
+    "SECURE": false
+  },
+  "database": {
+    "NAME": "store",
+    "USER": "postgres",
+    "PASSWORD": "root",
+    "HOST": "localhost",
+    "PORT": 5432,
+    "LOGGING": false
+  },
+  "JWT": {
+    "ACCESS_SECRET": "REW",
+    "REFRESH_SECRET": "REW",
+    "ACCESS_EXPIRES_IN": "5m",
+    "REFRESH_EXPIRES_IN": "12H"
+  },
+  "SMTP": {
+    "HOST": "smtp.gmail.com",
+    "PORT": "587",
+    "SECURE": false,
+    "USER": "",
+    "PASSWORD": ""
+  },
+  "logging": {
+    "level": 5
+  }
+}

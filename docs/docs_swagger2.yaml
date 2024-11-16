@@ -1,0 +1,868 @@
+---
+  info: 
+    title: "Сервис контроля качества"
+    description: "Данный сервис определяет основные API методы"
+    version: "1.0.0"
+    contact: 
+      name: "Dmitriy Prokhorov"
+      email: "dmitriy.prokhorov.04@gmail.com"
+  host: "localhost:8080"
+  basePath: "/"
+  produces: 
+    - "application/json"
+  schemes: 
+    - "http"
+  securityDefinitions: 
+    JWT: 
+      type: "apiKey"
+      in: "header"
+      name: "Authorization"
+      description: ""
+  swagger: "2.0"
+  paths: 
+    /api/auth/login: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/SignInDTO"
+        description: "Авторизация пользователя"
+        tags: 
+          - "Авторизация (пользователь)"
+        responses: 
+          200: 
+            description: "Авторизационные данные пользователя и пара токенов."
+            schema: 
+              $ref: "#/definitions/AuthorizationDTO"
+          400: 
+            description: "[VALIDATION_ERROR] Одно или несколько полей содержат ошибку."
+    /api/auth/registration: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/SignUpDTO"
+        description: "Ригистрация пользователя"
+        tags: 
+          - "Авторизация (пользователь)"
+        responses: 
+          200: 
+            description: "Авторизационные данные пользователя и пара токенов."
+            schema: 
+              $ref: "#/definitions/AuthorizationDTO"
+          400: 
+            description: "[VALIDATION_ERROR] Одно или несколько полей содержат ошибку."
+    /api/auth/sendResetPassword: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/EmailDTO"
+        description: "Отправит запрос на сброс пароля, на почту придет письмо с инструкцией"
+        tags: 
+          - "Авторизация (пользователь)"
+        responses: 
+          200: 
+            description: "Успешный ли запрос"
+            schema: 
+              $ref: "#/definitions/RequestSuccessDTO"
+          400: 
+            description: "[VALIDATION_ERROR] Одно или несколько полей содержат ошибку."
+    /api/auth/resetPassword/:uuid: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/EmailDTO"
+          - 
+            name: "uuid"
+            in: "params"
+            description: "UUID сброса пароля."
+            required: true
+            type: "string"
+        description: "Изменит пароль пользователя"
+        tags: 
+          - "Авторизация (пользователь)"
+        responses: 
+          200: 
+            description: "Авторизационные данные пользователя и пара токенов."
+            schema: 
+              $ref: "#/definitions/AuthorizationDTO"
+          400: 
+            description: "[VALIDATION_ERROR] Одно или несколько полей содержат ошибку."
+    /api/auth/refresh: 
+      post: 
+        parameters: 
+          - 
+            name: "refresh_token"
+            in: "header"
+            description: "refresh_token"
+            required: true
+            type: "string"
+        description: "Обновить токены (refresh)"
+        tags: 
+          - "Авторизация (пользователь)"
+        responses: 
+          200: 
+            description: "Пара токенов."
+            schema: 
+              $ref: "#/definitions/TokenDTO"
+          400: 
+            description: "[INVALID_REFRESH_TOKEN] Неверный токен."
+    /api/permission/give: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/PermissionInputDTO"
+        description: "Выдача разрешения пользователю"
+        tags: 
+          - "Разрешения"
+        responses: 
+          200: 
+            description: "Разрешение выдано."
+          400: 
+            description: "[PERMISSION_NOT_FOUND] Разрешение не найдено."
+    /api/permission/takeAway: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/PermissionInputDTO"
+        description: "Лишение пользователя разрешения"
+        tags: 
+          - "Разрешения"
+        responses: 
+          200: 
+            description: "Пользователь лишен разрешения."
+          400: 
+            description: "[PERMISSION_NOT_FOUND] Разрешение не найдено."
+    /api/permission: 
+      get: 
+        parameters: 
+          - 
+            name: "userId"
+            in: "query"
+            description: null
+            required: true
+            type: "string"
+        description: "Получение разрешений пользователя по id"
+        tags: 
+          - "Разрешения"
+        responses: 
+          200: 
+            description: "Разрешения пользователя."
+            schema: 
+              type: "array"
+              items: 
+                $ref: "#/definitions/PermissionDTO"
+          400: 
+            description: "[USER_NOT_FOUND] Пользователь не найден."
+    /api/permission/getAllAvailable: 
+      post: 
+        parameters: []
+        description: "Получение всех достпных разрешений"
+        tags: 
+          - "Разрешения"
+        responses: 
+          200: 
+            description: "Все доступные разрешения."
+            schema: 
+              type: "array"
+              items: 
+                $ref: "#/definitions/PermissionDTO"
+    /api/product/reject: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/RejectInputDTO"
+        description: "Добавление типа дефакта (отклонения)"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет созданный тип дефекта (отклонение)."
+            schema: 
+              $ref: "#/definitions/RejectDTO"
+          400: 
+            description: "[REJECT_INVALID] Неверное наименовние типа дефекта (отклонения)."
+      put: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/RejectDTO"
+        description: "Изменение типа дефакта (отклонения)"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет измененный тип дефекта (отклонение)."
+            schema: 
+              $ref: "#/definitions/RejectDTO"
+          400: 
+            description: "[REJECT_INVALID] Неверное наименовние типа дефекта (отклонения)."
+      get: 
+        parameters: 
+          - 
+            name: "id"
+            in: "query"
+            description: null
+            required: false
+            type: "string"
+        description: "Получение типа дефакта (отклонения)"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет тип дефекта (отклонение)."
+            schema: 
+              $ref: "#/definitions/RejectDTO"
+          201: 
+            description: "Вернет тип дефекта (отклонение) или массив ип дефекта (отклонение), если не указывать id."
+            schema: 
+              type: "array"
+              items: 
+                $ref: "#/definitions/RejectDTO"
+          400: 
+            description: "[REJECT_INVALID] Неверное наименовние типа дефекта (отклонения)."
+    /api/product/reject/move: 
+      put: 
+        parameters: 
+          - 
+            name: "activeId"
+            in: "input"
+            description: null
+            required: false
+            type: "number"
+          - 
+            name: "overId"
+            in: "input"
+            description: null
+            required: false
+            type: "number"
+        description: "Перемещение дефактов (изменеение положение дефектов при получении данных)"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Запрос выполнен."
+          400: 
+            description: "[INVALID_MOVE_KEYS] Ключи для перемещения неверны"
+    /api/product/round: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/ShiftInputDTO"
+        description: "Добавление смены"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет созданный размер."
+            schema: 
+              $ref: "#/definitions/ShiftDTO"
+          400: 
+            description: "[SHIFT_INVALID] Неверное наименовние размера."
+      put: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/ShiftDTO"
+        description: "Изменение смены"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет измененный размер."
+            schema: 
+              $ref: "#/definitions/ShiftDTO"
+          400: 
+            description: "[SHIFT_INVALID] Неверное наименовние размера."
+      get: 
+        parameters: 
+          - 
+            name: "id"
+            in: "query"
+            description: null
+            required: false
+            type: "string"
+        description: "Получение смены"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет смену или массив смен, если не указывать id."
+            schema: 
+              $ref: "#/definitions/ShiftDTO"
+          201: 
+            description: "Вернет смену или массив смен, если не указывать id."
+            schema: 
+              type: "array"
+              items: 
+                $ref: "#/definitions/ShiftDTO"
+          400: 
+            description: "[SHIFT_INVALID] Неверное наименовние смены."
+    /api/product/shift: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/ShiftInputDTO"
+        description: "Добавление смены"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет созданный размер."
+            schema: 
+              $ref: "#/definitions/ShiftDTO"
+          400: 
+            description: "[SHIFT_INVALID] Неверное наименовние размера."
+      put: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/ShiftDTO"
+        description: "Изменение смены"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет измененный размер."
+            schema: 
+              $ref: "#/definitions/ShiftDTO"
+          400: 
+            description: "[SHIFT_INVALID] Неверное наименовние размера."
+      get: 
+        parameters: 
+          - 
+            name: "id"
+            in: "query"
+            description: null
+            required: false
+            type: "string"
+        description: "Получение смены"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет смену или массив смен, если не указывать id."
+            schema: 
+              $ref: "#/definitions/ShiftDTO"
+          201: 
+            description: "Вернет смену или массив смен, если не указывать id."
+            schema: 
+              type: "array"
+              items: 
+                $ref: "#/definitions/ShiftDTO"
+          400: 
+            description: "[SHIFT_INVALID] Неверное наименовние смены."
+    /api/product/size: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/SizeInputDTO"
+        description: "Добавление размера"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет созданный размер."
+            schema: 
+              $ref: "#/definitions/SizeDTO"
+          400: 
+            description: "[SIZE_INVALID] Неверное наименовние размера."
+      put: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/SizeDTO"
+        description: "Изменение размера"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет измененный размер."
+            schema: 
+              $ref: "#/definitions/SizeDTO"
+          400: 
+            description: "[SIZE_INVALID] Неверное наименовние размера."
+      get: 
+        parameters: 
+          - 
+            name: "id"
+            in: "query"
+            description: null
+            required: false
+            type: "string"
+        description: "Получение размера"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет размер или массив размеров, если не указывать id."
+            schema: 
+              $ref: "#/definitions/SizeDTO"
+          201: 
+            description: "Вернет размер или массив размеров, если не указывать id."
+            schema: 
+              type: "array"
+              items: 
+                $ref: "#/definitions/SizeDTO"
+          400: 
+            description: "[SIZE_INVALID] Неверное наименовние размера."
+    /api/product/style: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/SizeInputDTO"
+        description: "Добавление стиля"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет созданный стиль."
+            schema: 
+              $ref: "#/definitions/SizeDTO"
+          400: 
+            description: "[STYLE_INVALID] Неверное наименовние стиля."
+      put: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/SizeDTO"
+        description: "Изменение стиля"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет измененный стиль."
+            schema: 
+              $ref: "#/definitions/SizeDTO"
+          400: 
+            description: "[STYLE_INVALID] Неверное наименовние размера."
+      get: 
+        parameters: 
+          - 
+            name: "id"
+            in: "query"
+            description: null
+            required: false
+            type: "string"
+        description: "Получение стияля"
+        tags: 
+          - "Парамтеры продукта"
+        responses: 
+          200: 
+            description: "Вернет стиль."
+            schema: 
+              $ref: "#/definitions/SizeDTO"
+          201: 
+            description: "Вернет стиль или массив стилей, если не указывать id."
+            schema: 
+              type: "array"
+              items: 
+                $ref: "#/definitions/SizeDTO"
+          400: 
+            description: "[STYLE_INVALID] Неверное наименовние стиля."
+    /api/user/:id: 
+      get: 
+        parameters: 
+          - 
+            name: "id"
+            in: "params"
+            description: null
+            required: true
+            type: "string"
+        description: "Получение пользователя по id"
+        tags: 
+          - "Пользователь"
+        responses: 
+          200: 
+            description: "Вернет пользоввателя."
+            schema: 
+              $ref: "#/definitions/UserDTO"
+          400: 
+            description: "[USER_NOT_FOUND]"
+      delete: 
+        parameters: 
+          - 
+            name: "id"
+            in: "params"
+            description: null
+            required: true
+            type: "string"
+        description: "Удаление пользователя по id"
+        tags: 
+          - "Пользователь"
+        responses: 
+          200: 
+            description: "Пользователь удален."
+          400: 
+            description: "[USER_NOT_FOUND]"
+      put: 
+        parameters: 
+          - 
+            name: "id"
+            in: "params"
+            description: null
+            required: true
+            type: "string"
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/UserWithoutIdDTO"
+        description: "Обновление данных пользователя"
+        tags: 
+          - "Пользователь"
+        responses: 
+          200: 
+            description: "Вернет обновленного пользователя."
+            schema: 
+              $ref: "#/definitions/UserDTO"
+    /api/user: 
+      post: 
+        parameters: 
+          - 
+            name: "input"
+            in: "body"
+            description: null
+            required: true
+            schema: 
+              $ref: "#/definitions/UserWithoutIdDTO"
+        description: "Создание пользователя"
+        tags: 
+          - "Пользователь"
+        responses: 
+          200: 
+            description: "Вернет созданного пользователя."
+            schema: 
+              $ref: "#/definitions/UserDTO"
+  definitions: 
+    AuthorizationDTO: 
+      required: 
+        - "user"
+        - "tokens"
+      properties: 
+        user: 
+          $ref: "#/definitions/UserDTO"
+        tokens: 
+          $ref: "#/definitions/TokenDTO"
+    EmailDTO: 
+      required: 
+        - "email"
+      properties: 
+        email: 
+          type: "string"
+          description: ""
+    PermissionInputDTO: 
+      required: 
+        - "userId"
+        - "permissionId"
+      properties: 
+        userId: 
+          type: "string"
+          description: ""
+        permissionId: 
+          type: "string"
+          description: ""
+    PermissionDTO: 
+      required: 
+        - "userId"
+        - "value"
+        - "name"
+      properties: 
+        userId: 
+          type: "string"
+          description: ""
+        value: 
+          type: "string"
+          description: ""
+        name: 
+          type: "string"
+          description: ""
+    RejectInputDTO: 
+      required: 
+        - "name"
+      properties: 
+        name: 
+          type: "string"
+          description: ""
+    RejectDTO: 
+      required: 
+        - "id"
+        - "name"
+        - "active"
+        - "key"
+      properties: 
+        id: 
+          type: "string"
+          description: ""
+        name: 
+          type: "string"
+          description: ""
+        active: 
+          type: "boolean"
+          description: ""
+        key: 
+          type: "number"
+          description: ""
+    RequestSuccessDTO: 
+      required: 
+        - "success"
+      properties: 
+        success: 
+          type: "boolean"
+          description: ""
+    RoundInputDTO: 
+      required: 
+        - "value"
+      properties: 
+        value: 
+          type: "number"
+          description: ""
+    RoundDTO: 
+      required: 
+        - "id"
+        - "value"
+        - "active"
+      properties: 
+        id: 
+          type: "string"
+          description: ""
+        value: 
+          type: "number"
+          description: ""
+        active: 
+          type: "boolean"
+          description: ""
+    ShiftInputDTO: 
+      required: 
+        - "value"
+      properties: 
+        value: 
+          type: "number"
+          description: ""
+    ShiftDTO: 
+      required: 
+        - "id"
+        - "value"
+        - "active"
+      properties: 
+        id: 
+          type: "string"
+          description: ""
+        value: 
+          type: "number"
+          description: ""
+        active: 
+          type: "boolean"
+          description: ""
+    SignInDTO: 
+      required: 
+        - "email"
+        - "password"
+      properties: 
+        email: 
+          type: "string"
+          description: ""
+        password: 
+          type: "string"
+          description: ""
+    SignUpDTO: 
+      required: 
+        - "email"
+        - "name"
+        - "lastname"
+        - "patronymic"
+        - "password"
+      properties: 
+        email: 
+          type: "string"
+          description: ""
+        name: 
+          type: "string"
+          description: ""
+        lastname: 
+          type: "string"
+          description: ""
+        patronymic: 
+          type: "string"
+          description: ""
+        password: 
+          type: "string"
+          description: ""
+    SizeInputDTO: 
+      required: 
+        - "value"
+      properties: 
+        value: 
+          type: "string"
+          description: ""
+    SizeDTO: 
+      required: 
+        - "id"
+        - "value"
+        - "active"
+      properties: 
+        id: 
+          type: "string"
+          description: ""
+        value: 
+          type: "string"
+          description: ""
+        active: 
+          type: "boolean"
+          description: ""
+    StyleInputDTO: 
+      required: 
+        - "value"
+      properties: 
+        value: 
+          type: "string"
+          description: ""
+    StyleDTO: 
+      required: 
+        - "id"
+        - "value"
+        - "active"
+      properties: 
+        id: 
+          type: "string"
+          description: ""
+        value: 
+          type: "string"
+          description: ""
+        active: 
+          type: "boolean"
+          description: ""
+    TokenDTO: 
+      required: 
+        - "access_token"
+        - "refresh_token"
+      properties: 
+        access_token: 
+          type: "string"
+          description: ""
+        refresh_token: 
+          type: "string"
+          description: ""
+    UserDTO: 
+      required: 
+        - "id"
+        - "email"
+        - "name"
+        - "lastname"
+        - "patronymic"
+      properties: 
+        id: 
+          type: "string"
+          description: ""
+        email: 
+          type: "string"
+          description: ""
+        name: 
+          type: "string"
+          description: ""
+        lastname: 
+          type: "string"
+          description: ""
+        patronymic: 
+          type: "string"
+          description: ""
+    UserWithoutIdDTO: 
+      required: 
+        - "user"
+        - "count"
+      properties: 
+        user: 
+          $ref: "#/definitions/UserDTO"
+        count: 
+          type: "number"
+          description: ""
+  responses: {}
+  parameters: {}
+  tags: 
+    - 
+      name: "Авторизация (пользователь)"
+      description: "Методы авторизации пользователя"
+    - 
+      name: "Разрешения"
+      description: "Методы добавления, изменения и просмотра разрешений"
+    - 
+      name: "Парамтеры продукта"
+      description: "Методы добавления, изменения и просмотра парамтеров продукта"
+    - 
+      name: "Пользователь"
+      description: "Методы добавления, изменения и просмотра пользователей"
